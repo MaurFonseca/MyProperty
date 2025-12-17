@@ -8,45 +8,42 @@
 import SwiftUI
 
 struct ContentView: View {
-    private let properties = ["HOUSE 123", "HOUSE 456", "HOUSE 789"]
-    @State private var selectedProperty = "HOUSE 123"
-    @State private var workOrderCount = 0
-    @State private var operatorName = ""
+
+    @StateObject private var workOrderViewModel = WorkOrderViewModel()
+
     var body: some View {
-        NavigationStack {
-            Form{
-                Section{
-                    Picker("Select the property", selection: $selectedProperty){
-                        ForEach(properties, id: \.self){
-                            Text($0)
-                        }
-                    }
+        NavigationView {
+            VStack(spacing: 20) {
+                Spacer()
+
+                NavigationLink(
+                    destination: CreateWorkOrderView(
+                        viewModel: workOrderViewModel
+                    )
+                ) {
+                    Text("Create Work Order")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(width: 250, height: 55)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [.blue, .purple]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(15)
+                        .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 5)
                 }
-                Section{
-                        TextField("Field Operators", text: $operatorName)
-                }
-                Section{
-                    VStack{
-                        HStack{
-                            Button("Add Work Order"){
-                                workOrderCount += 1
-                            }
-                            Spacer()
-                            Text("Number of WOs: \(workOrderCount)")
-                        }
-                        
-                    }
-                }
+
+                Spacer()
             }
             .navigationTitle("Home")
-            .navigationBarTitleDisplayMode(.inline)
-            Button("Reset"){
-                workOrderCount = 0
-                operatorName = ""
-            }
         }
     }
 }
+
 
 //Para termos o preview ao lado ->
 #Preview {

@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import SwiftData
 
-struct WorkOrder: Identifiable, Codable, Hashable{
-    let id: UUID
+@Model
+class WorkOrder {
+    @Attribute(.unique)var id: UUID
     var fieldOperator: String
     var house: String
     var createdAt: Date

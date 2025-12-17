@@ -8,31 +8,32 @@
 import Foundation
 import SwiftUI
 import Combine
+import SwiftData
 
-class WorkOrderViewModel: ObservableObject{
+@Observable
+class WorkOrderViewModel{
     
-    @Published var workOrders: [WorkOrder] = []
+    private var context: ModelContext
     
-    init(){
-        loadMockData()
+    init(context: ModelContext){
+        self.context = context
     }
+    
+    // Crud Operations
     
     func createWorkOrder(
         fieldOperator: String,
         house: String,
         scheduleDate: Date? = nil,
         notes: String? = nil
-    ){
-        let newWorkOrder = WorkOrder(
+    ) throws {
+        let workOrder = WorkOrder(
             fieldOperator: fieldOperator,
             house: house,
             scheduleDate: scheduleDate,
             notes: notes
         )
-        workOrders.append(newWorkOrder)
-    }
-    
-    private func loadMockData(){
-        
+        context.insert(workOrder)
+        try context.save()
     }
 }

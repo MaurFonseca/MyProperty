@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CreateWorkOrderView: View{
-    @ObservedObject var viewModel: WorkOrderViewModel
-    
+    @Environment(\.modelContext) private var context
     @Environment(\.dismiss) var dismiss
+    
+    private var viewModel: WorkOrderViewModel {
+        WorkOrderViewModel(context: context)
+    }
     
     // Dados mockados para teste
     private let operadores: [String] = ["Maurício Fonseca", "Ana Oliveira", "José Pereira"]
@@ -63,6 +67,11 @@ struct CreateWorkOrderView: View{
                     }
                 }
             }
+            .alert("Error", isPresented: $showAlert){
+                Button("OK", role: .cancel){}
+            } message: {
+                Text(alertMessage)
+            }
         }
     }
     
@@ -96,7 +105,7 @@ struct CreateWorkOrderView: View{
                 DatePicker(
                     "Select date",
                     selection: $scheduleDate,
-                    displayedComponents: .date
+                    displayedComponents: [.date, .hourAndMinute]
                 )
             }
         }
@@ -114,7 +123,7 @@ struct CreateWorkOrderView: View{
 
                 TextEditor(text: $notes)
                     .frame(minHeight: 120)
-                    .onChange(of: notes){ newValue in
+                    .onChange(of: notes){ oldValue, newValue in
                         if newValue.count > notesLimit{
                             notes = String(newValue.prefix(notesLimit))
                         }
@@ -140,20 +149,30 @@ struct CreateWorkOrderView: View{
             return
         }
 
-        viewModel.createWorkOrder(
-            fieldOperator: operatorName,
-            house: houseName,
-            scheduleDate: hasScheduleDate ? scheduleDate : nil,
-            notes: notes.isEmpty ? nil : notes
-        )
-        
-        print("Created work order" + " \(operatorName) \(houseName) \(scheduleDate)")
-
-        dismiss()
+        do{
+            try viewModel.createWorkOrder(
+                fieldOperator: operatorName,
+                house: houseName,
+                scheduleDate: hasScheduleDate ? scheduleDate : nil,
+                notes: notes.isEmpty ? nil : notes
+                )
+            print("Created work order:  \(operatorName) - \(houseName) - \(notes) - \(scheduleDate)")
+            
+            notes = ""
+            
+            dismiss()
+            
+        }catch{
+            alertMessage = "Failed to create work order. \(error.localizedDescription)"
+            showAlert = true
+            print("Error creating work order: \(error)")
+        }
+    
     }
     
 }
 
 #Preview {
-    CreateWorkOrderView(viewModel: WorkOrderViewModel())
+    CreateWorkOrderView()
+        .modelContainer(for: WorkOrder.self, inMemory: true)
 }
